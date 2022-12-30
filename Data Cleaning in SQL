@@ -1,16 +1,16 @@
 --Cleaning Housing Data in SQL--
 
-select*
-from PortfolioProject.dbo.NashvilleHousing
+SELECT*
+FROM PortfolioProject.dbo.NashvilleHousing
 
 ----------------------------------------------------------------------
 
 --Standardize Date Format
 
-select saledateconverted, convert(date, saledate)
-from PortfolioProject.dbo.NashvilleHousing
+SELECT saledateconverted, convert(date, saledate)
+FROM PortfolioProject.dbo.NashvilleHousing
 
-update NashvilleHousing
+UPDATE NashvilleHousing
 set saledate = convert(date, saledate)
 
 alter table NashvilleHousing
@@ -23,41 +23,41 @@ set saledateconverted = convert (date, saledate)
 
 --populate property address data
 
-select*
-from PortfolioProject.dbo.NashvilleHousing
---where PropertyAddress is null
-order by ParcelID
+SELECT*
+FROM PortfolioProject.dbo.NashvilleHousing
+WHERE PropertyAddress is null
+ORDER BY ParcelID
 
-select a.ParcelID, a.PropertyAddress, b.ParcelID, b.PropertyAddress, ISNULL(a.propertyaddress, b.PropertyAddress)
-from PortfolioProject.dbo.NashvilleHousing a
-join PortfolioProject.dbo.NashvilleHousing b
- on a.ParcelID = b.ParcelID
- and a.[UniqueID ]<> b.[UniqueID ]
- Where a.PropertyAddress is null
+SELECT a.ParcelID, a.PropertyAddress, b.ParcelID, b.PropertyAddress, ISNULL(a.propertyaddress, b.PropertyAddress)
+FROM PortfolioProject.dbo.NashvilleHousing a
+JOIN PortfolioProject.dbo.NashvilleHousing b
+ ON a.ParcelID = b.ParcelID
+ AND a.[UniqueID ]<> b.[UniqueID ]
+ WHERE a.PropertyAddress is null
 
 
- update a
+ UPDATE a
  set propertyaddress = ISNULL(a.propertyaddress, b.PropertyAddress)
- from PortfolioProject.dbo.NashvilleHousing a
-join PortfolioProject.dbo.NashvilleHousing b
- on a.ParcelID = b.ParcelID
- and a.[UniqueID ]<> b.[UniqueID ]
- Where a.PropertyAddress is null
+ FRIM PortfolioProject.dbo.NashvilleHousing a
+JOIN PortfolioProject.dbo.NashvilleHousing b
+ ON a.ParcelID = b.ParcelID
+ AND a.[UniqueID ]<> b.[UniqueID ]
+ WHERE a.PropertyAddress is null
 
  -------------------------------------------------------------------------
 
- --breaking out address into individual columns (Address, city, state)
+ --PUTTING THE ADDRESS INTO INDIVIDUAL COLUMNS--
 
- select PropertyAddress
- from PortfolioProject.dbo.NashvilleHousing
- --where propertyaddress is null
- --order by parcelID
+ SELECT PropertyAddress
+ FROM PortfolioProject.dbo.NashvilleHousing
+ WHERE propertyaddress is null
+ ORDER BY parcelID
 
- select 
+ SELECT 
  SUBSTRING(propertyaddress, 1, CHARINDEX(',', propertyaddress) -1) as address,
  SUBSTRING(propertyaddress, CHARINDEX(',', propertyaddress) +1, len(PropertyAddress)) as address
 
- from PortfolioProject.dbo.NashvilleHousing
+ FROM PortfolioProject.dbo.NashvilleHousing
 
 
  alter table NashvilleHousing
@@ -74,22 +74,22 @@ update NashvilleHousing
 set propertysplitcity = SUBSTRING(propertyaddress, CHARINDEX(',', propertyaddress) +1, len(PropertyAddress))
 
 
-select*
-from PortfolioProject.dbo.NashvilleHousing
+SELECT*
+FROM PortfolioProject.dbo.NashvilleHousing
 
 
 
 
 
-select OwnerAddress
-from PortfolioProject.dbo.NashvilleHousing
+SELECT OwnerAddress
+FROM PortfolioProject.dbo.NashvilleHousing
 
 
-select
+SELECT
 PARSENAME(replace(owneraddress, ',', '.'), 3)
 ,PARSENAME(replace(owneraddress, ',', '.'), 2)
 ,PARSENAME(replace(owneraddress, ',', '.'), 1)
-from PortfolioProject.dbo.NashvilleHousing
+FROM PortfolioProject.dbo.NashvilleHousing
 
 
 
@@ -115,8 +115,8 @@ update NashvilleHousing
 set ownersplitstate = PARSENAME(replace(owneraddress, ',', '.'), 1)
 
 
-select*
-from PortfolioProject.dbo.NashvilleHousing
+SELECT*
+FROM PortfolioProject.dbo.NashvilleHousing
 
 --------------------------------------------------------------------------
 
@@ -129,12 +129,12 @@ group by SoldAsVacant
 order by 2
 
 
-select SoldAsVacant
+SELECT SoldAsVacant
 , case when SoldAsVacant = 'Y' THEN 'YES'
        WHEN SoldAsVacant = 'N' then 'NO' 
 	   ELSE SoldAsVacant
 	   end
-from PortfolioProject.dbo.NashvilleHousing
+FROM PortfolioProject.dbo.NashvilleHousing
 
 
 update NashvilleHousing
@@ -149,7 +149,7 @@ set SoldAsVacant = case when SoldAsVacant = 'Y' THEN 'YES'
 --remove duplicates
 
 with rownumCTE as(
-select*,
+SELECT*,
     row_number() over(
 	partition by parcelID,
                   propertyaddress,
@@ -160,23 +160,23 @@ select*,
 				  uniqueID
 				  ) ROW_NUM
  
-from portfolioproject.dbo.NashvilleHousing
---order by ParcelID
+FROM portfolioproject.dbo.NashvilleHousing
+--ORDER BY ParcelID
 )
-select*
-from rownumCTE
+SELECT*
+FROM rownumCTE
 WHERE row_num > 1
-order by PropertyAddress
+ORDER BY PropertyAddress
 
 
 -------------------------------------------------------------------------------
 
---delete unused columns
+--DELETE UNUSED COLUMNS--
 
 
 
-select*
-from PortfolioProject.dbo.NashvilleHousing
+SELECT*
+FROM PortfolioProject.dbo.NashvilleHousing
 
 alter table portfolioproject.dbo.NashvilleHousing
 drop column owneraddress, taxdistrict, propertyaddress
